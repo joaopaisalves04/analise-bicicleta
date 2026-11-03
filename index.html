@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1f3a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bicicleta">
+<title>Análise da Bicicleta</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icone-192.png">
+<link rel="apple-touch-icon" href="icone-180.png">
+<style>
+  :root { --noite:#0b1f3a; --azul:#2a78d6; --verde:#1baf7a; --laranja:#eb6834; --amarelo:#eda100;
+          --tinta:#1c1b19; --tinta2:#52514e; --suave:#f6f6f3; --linha:#e8e7e1; --pagina:#f1f2ee; }
+  * { box-sizing:border-box; }
+  html, body { height:100%; margin:0; }
+  body { font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; color:var(--tinta); background:var(--pagina);
+         display:flex; flex-direction:column; -webkit-font-smoothing:antialiased; }
+  button { font:inherit; cursor:pointer; }
+  svg.i { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  [hidden] { display:none !important; }
+
+  /* barra de cima */
+  .topo { flex:none; display:flex; align-items:center; gap:10px; padding:8px 14px; padding-top:max(8px, env(safe-area-inset-top));
+          background:var(--noite); color:#fff; }
+  .topo b { font-size:15px; letter-spacing:.2px; margin-right:auto; display:flex; align-items:center; gap:8px; }
+  .topo svg { width:20px; height:20px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .topo button { background:rgba(255,255,255,.14); color:#fff; border:0; border-radius:999px; padding:6px 14px; font-size:14px; }
+  .topo button:hover { background:rgba(255,255,255,.24); }
+  iframe#relatorio { flex:1; width:100%; border:0; min-height:0; }
+  main { flex:1; overflow:auto; }
+
+  /* cabeçalho da página inicial */
+  .hero { position:relative; overflow:hidden; color:#fff; padding:54px 20px 92px;
+          background:radial-gradient(110% 140% at 88% -20%, #2a78d6 0%, #15407a 44%, #0b1f3a 100%); }
+  .hero::before { content:""; position:absolute; inset:0; opacity:.5;
+                  background:radial-gradient(40% 55% at 12% 105%, rgba(27,175,122,.45), transparent 70%); }
+  .hero svg.perfil { position:absolute; right:-20px; bottom:0; width:min(760px,92%); height:auto; opacity:.9; pointer-events:none; }
+  .largura { max-width:820px; margin:0 auto; position:relative; }
+  .etiqueta { display:inline-block; font-size:13px; font-weight:650; letter-spacing:.08em; text-transform:uppercase;
+              color:#bcd7f7; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.18); padding:4px 12px; border-radius:999px; }
+  .hero h1 { font-size:clamp(32px,6vw,52px); line-height:1.08; margin:16px 0 14px; letter-spacing:-.025em; font-weight:760; max-width:15em; }
+  .hero p.sub { margin:0; font-size:clamp(17px,2.4vw,20px); max-width:34em; color:#d6e5f8; }
+  .selos { display:flex; flex-wrap:wrap; gap:8px; margin-top:22px; }
+  .selos span { display:inline-flex; align-items:center; gap:7px; font-size:14px; font-weight:560; padding:6px 13px; border-radius:999px;
+                background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); }
+  .selos svg { width:16px; height:16px; fill:none; stroke:#7fe0b8; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
+
+  /* cartão de largar ficheiros */
+  .cartao { background:#fff; border-radius:20px; box-shadow:0 12px 44px rgba(11,31,58,.18); padding:22px; margin:-58px auto 0;
+            max-width:820px; position:relative; }
+  #largar { border:2px dashed #b4c5dc; border-radius:16px; padding:34px 16px; text-align:center; transition:.18s;
+            background:linear-gradient(180deg,#f8fbff,#f1f6fd); }
+  #largar.sobre { border-color:var(--azul); background:#e6f0fc; transform:scale(1.01); }
+  #largar .circulo { width:56px; height:56px; border-radius:50%; margin:0 auto 12px; display:grid; place-items:center;
+                     background:linear-gradient(135deg,#2a78d6,#1d5fb4); color:#fff; box-shadow:0 8px 20px rgba(42,120,214,.35); }
+  #largar .circulo svg { width:26px; height:26px; }
+  #largar strong { display:block; font-size:20px; margin-bottom:2px; }
+  #largar span.d { color:var(--tinta2); font-size:15px; }
+  .botoes { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:18px; }
+  .primario { background:var(--azul); color:#fff; border:0; border-radius:999px; padding:12px 24px; font-weight:650;
+              box-shadow:0 6px 16px rgba(42,120,214,.32); transition:.15s; }
+  .primario:hover { background:#1f66bd; transform:translateY(-1px); }
+  .secundario { background:#fff; color:var(--azul); border:1.5px solid #c4d6ee; border-radius:999px; padding:11px 20px; font-weight:650; }
+  .secundario:hover { background:#f3f8fe; }
+  .campos { display:flex; flex-wrap:wrap; gap:14px; margin-top:20px; align-items:end; }
+  .campos label { display:flex; flex-direction:column; font-size:14px; color:var(--tinta2); gap:4px; }
+  .campos input { font:inherit; padding:8px 10px; border:1.5px solid var(--linha); border-radius:10px; width:130px; }
+  .campos small { flex-basis:100%; color:var(--tinta2); }
+  .nota { color:var(--tinta2); font-size:14px; }
+  .cartao a { color:var(--azul); font-weight:600; }
+
+  /* blocos de conteúdo */
+  section.bloco { max-width:820px; margin:44px auto 0; padding:0 20px; }
+  section.bloco > h2 { font-size:24px; letter-spacing:-.015em; margin:0 0 4px; }
+  section.bloco > p.sub2 { margin:0 0 18px; color:var(--tinta2); }
+  .grelha { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:12px; }
+  .tema { background:#fff; border-radius:16px; padding:16px 16px 14px; border:1px solid rgba(0,0,0,.04);
+          box-shadow:0 1px 2px rgba(16,24,40,.04), 0 6px 18px rgba(16,24,40,.05); transition:.18s; }
+  .tema:hover { transform:translateY(-3px); box-shadow:0 2px 4px rgba(16,24,40,.05), 0 14px 30px rgba(16,24,40,.1); }
+  .tema .ic { width:40px; height:40px; border-radius:12px; display:grid; place-items:center; margin-bottom:10px; }
+  .tema h3 { margin:0 0 4px; font-size:17px; }
+  .tema p { margin:0; font-size:15px; color:var(--tinta2); }
+  .c-azul { background:#e6f0fc; color:#1f66bd; } .c-verde { background:#e2f6ee; color:#12805a; }
+  .c-laranja { background:#fdeadf; color:#b8450f; } .c-amarelo { background:#fdf1d4; color:#8a5d00; }
+
+  .passos { counter-reset:passo; display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; }
+  .passo { position:relative; background:#fff; border-radius:16px; padding:16px 16px 16px 58px; border:1px solid rgba(0,0,0,.04);
+           box-shadow:0 1px 2px rgba(16,24,40,.04), 0 6px 18px rgba(16,24,40,.05); }
+  .passo::before { counter-increment:passo; content:counter(passo); position:absolute; left:14px; top:14px; width:32px; height:32px;
+                   border-radius:50%; display:grid; place-items:center; font-weight:750; color:#fff;
+                   background:linear-gradient(135deg,#2a78d6,#1d5fb4); }
+  .passo b { display:block; margin-bottom:2px; } .passo span { font-size:15px; color:var(--tinta2); }
+
+  .privado { display:flex; gap:14px; align-items:flex-start; background:linear-gradient(135deg,#e9f7f1,#eef6fd); border-radius:16px;
+             padding:16px 18px; border:1px solid rgba(27,175,122,.25); }
+  .privado .ic { flex:none; width:40px; height:40px; border-radius:12px; display:grid; place-items:center; background:#fff; color:#12805a; }
+  .privado p { margin:0; font-size:15px; } .privado b { font-weight:650; }
+
+  details { background:#fff; border-radius:14px; padding:12px 16px; margin:10px 0; border:1px solid rgba(0,0,0,.04);
+            box-shadow:0 1px 2px rgba(16,24,40,.04); }
+  details summary { cursor:pointer; font-weight:650; }
+  ol, ul { padding-left:22px; margin:8px 0; } li { margin:4px 0; }
+  footer { max-width:820px; margin:34px auto 0; padding:0 20px 40px; color:var(--tinta2); font-size:14px; }
+  footer a { color:var(--azul); }
+
+  /* janela de progresso */
+  #progresso { position:fixed; inset:0; background:rgba(11,31,58,.55); display:flex; align-items:center; justify-content:center; padding:20px; z-index:10; backdrop-filter:blur(3px); }
+  #progresso .caixa { background:#fff; border-radius:20px; padding:26px; width:min(520px,100%); box-shadow:0 10px 50px rgba(0,0,0,.35); }
+  #progresso h2 { margin:0 0 6px; font-size:20px; }
+  .barra { height:8px; border-radius:99px; background:#e4ebf5; overflow:hidden; margin:14px 0 8px; }
+  .barra i { display:block; height:100%; width:30%; background:linear-gradient(90deg,#2a78d6,#1baf7a); border-radius:99px; }
+  .barra.indef i { animation:corre 1.2s ease-in-out infinite; }
+  @keyframes corre { 0% { margin-left:-30%; } 100% { margin-left:100%; } }
+  #contagem { color:var(--tinta2); font-size:15px; min-height:1.5em; }
+  #registo { max-height:140px; overflow:auto; font:12.5px/1.45 ui-monospace,Menlo,Consolas,monospace; color:var(--tinta2); white-space:pre-wrap; }
+  #erro { background:#fdecec; color:#8a1c1c; border-radius:12px; padding:12px 14px; margin-top:12px; white-space:pre-wrap; font-size:14px; }
+  #aviso { position:fixed; left:50%; bottom:22px; transform:translateX(-50%); background:var(--noite); color:#fff; padding:10px 18px; border-radius:999px; font-size:15px; z-index:11; max-width:92vw; }
+
+  @media (max-width:560px) {
+    .topo { gap:6px; padding:6px 10px; } .topo b span { display:none; }
+    .topo button { padding:6px 11px; font-size:13px; white-space:nowrap; }
+    .hero { padding:38px 18px 84px; } .hero svg.perfil { opacity:.5; }
+    .cartao { margin-left:12px; margin-right:12px; padding:16px; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .hero h1, .hero p.sub, .selos { animation:sobe .6s both; } .hero p.sub { animation-delay:.08s; } .selos { animation-delay:.16s; }
+    @keyframes sobe { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition:none !important; } }
+</style>
+</head>
+<body>
+<header class="topo">
+  <b><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="16.5" r="3.5"/><circle cx="18.5" cy="16.5" r="3.5"/><path d="M5.5 16.5 9 8h5l4.5 8.5M9 8 12 16.5M14 8l-1.5-3H10"/></svg><span>Análise da Bicicleta</span></b>
+  <button id="b-juntar" hidden>Adicionar passeios</button>
+  <button id="b-nuvem" hidden></button>
+  <button id="b-fcmax" hidden title="Corrigir a frequência cardíaca máxima">FC máxima</button>
+  <button id="b-apagar" hidden>Apagar os meus dados</button>
+</header>
+
+<main id="inicio">
+  <div class="hero">
+    <svg class="perfil" viewBox="0 0 760 260" fill="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#7fe0b8" stop-opacity="0"/><stop offset=".4" stop-color="#7fe0b8"/><stop offset="1" stop-color="#9cc8ff"/></linearGradient>
+        <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9cc8ff" stop-opacity=".28"/><stop offset="1" stop-color="#9cc8ff" stop-opacity="0"/></linearGradient>
+      </defs>
+      <path d="M0 200 C60 190 90 120 150 128 S250 205 310 170 S400 70 470 90 S580 190 640 120 S720 60 760 70 V260 H0Z" fill="url(#g2)"/>
+      <path d="M0 200 C60 190 90 120 150 128 S250 205 310 170 S400 70 470 90 S580 190 640 120 S720 60 760 70" stroke="url(#g1)" stroke-width="3.5" stroke-linecap="round"/>
+      <circle cx="470" cy="90" r="6" fill="#fff"/><circle cx="470" cy="90" r="14" stroke="#fff" stroke-opacity=".35" stroke-width="2"/>
+      <path d="M0 232H760" stroke="#fff" stroke-opacity=".12"/><path d="M0 196H760" stroke="#fff" stroke-opacity=".08" stroke-dasharray="4 8"/>
+    </svg>
+    <div class="largura">
+      <span class="etiqueta">Ciclismo + Garmin</span>
+      <h1>Percebe a tua forma na bicicleta</h1>
+      <p class="sub">Larga os passeios do teu Garmin e vê a evolução, o coração, os recordes e um mapa dos teus percursos.</p>
+      <div class="selos">
+        <span><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>Grátis</span>
+        <span><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>Sem conta</span>
+        <span><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>Os dados ficam no teu aparelho</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="cartao">
+    <div id="largar">
+      <div class="circulo"><svg class="i" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg></div>
+      <strong>Larga aqui os ficheiros do Garmin</strong>
+      <span class="d">passeios (.fit), ou a exportação completa (.zip)</span>
+      <div class="botoes">
+        <button class="primario" id="b-escolher">Escolher ficheiros</button>
+        <button class="secundario" id="b-pasta">Escolher uma pasta</button>
+      </div>
+    </div>
+    <div class="campos">
+      <label>FC máxima (bpm)<input id="fcmax" type="number" min="120" max="230" inputmode="numeric" placeholder="ex.: 185"></label>
+      <label>ou a tua idade<input id="idade" type="number" min="10" max="90" inputmode="numeric" placeholder="ex.: 35"></label>
+      <small>Opcional. Serve para calcular as zonas de esforço. Se importares a exportação completa da Garmin, as tuas zonas vêm de lá.</small>
+    </div>
+    <p id="l-nuvem" class="nota" hidden style="margin:18px 0 0">Já fizeste isto noutro aparelho? <a href="#" id="a-nuvem">Obter o relatório do Google Drive</a></p>
+  </div>
+
+  <section class="bloco">
+    <h2>O que vais ficar a saber</h2>
+    <p class="sub2">Respostas diretas, em português simples, calculadas só com os teus passeios.</p>
+    <div class="grelha">
+      <div class="tema"><div class="ic c-azul"><svg class="i" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></div>
+        <h3>Estou em melhor forma?</h3><p>Quantos metros andas por cada batimento do coração. Se o número sobe, estás mais eficiente.</p></div>
+      <div class="tema"><div class="ic c-verde"><svg class="i" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></div>
+        <h3>Estou fresco ou cansado?</h3><p>A carga dos últimos dias, para saberes quando forçar e quando descansar.</p></div>
+      <div class="tema"><div class="ic c-laranja"><svg class="i" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg></div>
+        <h3>Como trabalha o meu coração?</h3><p>O tempo em cada zona de esforço e o que mexe com a tua frequência cardíaca.</p></div>
+      <div class="tema"><div class="ic c-amarelo"><svg class="i" viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg></div>
+        <h3>Por onde ando?</h3><p>Um mapa com as estradas que mais repetes e as tuas voltas habituais.</p></div>
+    </div>
+  </section>
+
+  <section class="bloco">
+    <h2>Como funciona</h2>
+    <p class="sub2">Três passos, e só o primeiro é no site do Garmin.</p>
+    <div class="passos">
+      <div class="passo"><b>Exporta do Garmin</b><span>No Garmin Connect, num computador, exporta os teus passeios.</span></div>
+      <div class="passo"><b>Larga aqui</b><span>Arrasta os ficheiros para a caixa de cima, sem os abrir.</span></div>
+      <div class="passo"><b>Vê a análise</b><span>Em poucos minutos tens o relatório e o mapa. Da vez seguinte abre logo.</span></div>
+    </div>
+  </section>
+
+  <section class="bloco">
+    <div class="privado">
+      <div class="ic"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div>
+      <p><b>Os teus dados são só teus.</b> Os ficheiros ficam guardados neste aparelho, no browser. Não há servidor nem conta, e ninguém, incluindo quem fez esta página, vê os teus passeios.</p>
+    </div>
+  </section>
+
+  <section class="bloco">
+    <h2>Como trazer os passeios do Garmin</h2>
+    <details open><summary>Alguns passeios (um a um)</summary>
+      <ol>
+        <li>No computador, abre <b>connect.garmin.com</b> e entra na tua conta.</li>
+        <li>Abre um passeio, carrega na roda dentada (canto superior direito) e escolhe <b>Exportar original</b>.</li>
+        <li>Repete para cada passeio. Os ficheiros vão para as Transferências. Larga-os aqui.</li>
+      </ol>
+    </details>
+    <details><summary>Todos de uma vez</summary>
+      <ol>
+        <li>No Garmin Connect: <b>Definições da conta</b>, <b>Gestão de dados</b>, <b>Exportar os teus dados</b>.</li>
+        <li>A Garmin manda um email com um .zip (pode demorar uns dias). Larga esse .zip aqui, sem o abrir.</li>
+        <li>Esta forma traz também as tuas zonas de frequência cardíaca.</li>
+      </ol>
+      <p class="nota">No Mac, o Safari abre sozinho os .zip que descarrega e deixa uma pasta. Podes largar a pasta aqui, ou usar "Escolher uma pasta".</p>
+    </details>
+    <details><summary>Depois de cada passeio novo</summary>
+      <p>Exporta-o como acima e carrega em "Adicionar passeios" (ou larga-o em cima da página). O programa só junta o que é novo.</p>
+    </details>
+  </section>
+
+  <footer>
+    <p><b>Privacidade.</b> Só saem dois pedidos, como em qualquer mapa ou previsão do tempo: à Open-Meteo, a zona aproximada (cerca de 10 km) e as datas, para saber o tempo que fez; e à Esri, os pedaços de mapa que estás a ver. Mais detalhes na <a href="privacidade.html">página de privacidade</a>.</p>
+    <p>Se quiseres ver o relatório também no telemóvel, há um botão para o guardar no teu Google Drive. Fica numa pasta privada desta página, na tua conta, que só esta página consegue abrir. Não passa por nenhum servidor nosso.</p>
+    <p>Nota: o Safari apaga os dados dos sites que não abres há 7 dias. Se isso acontecer, basta largar os ficheiros outra vez. Nos outros browsers os dados ficam.</p>
+  </footer>
+</main>
+
+<iframe id="relatorio" title="Relatório" hidden></iframe>
+
+<div id="progresso" hidden>
+  <div class="caixa">
+    <h2 id="titulo">A trabalhar...</h2>
+    <div class="barra indef" id="barra"><i></i></div>
+    <div id="contagem"></div>
+    <details><summary>Detalhes</summary><div id="registo"></div></details>
+    <div id="erro" hidden></div>
+    <div class="botoes" id="fechar-erro" hidden><button class="secundario" id="b-fechar">Fechar</button></div>
+  </div>
+</div>
+<div id="aviso" hidden></div>
+
+<input type="file" id="in-ficheiros" accept=".fit,.zip,.json" multiple hidden>
+<input type="file" id="in-pasta" webkitdirectory hidden>
+<script src="config.js"></script>
+<script src="sincronizar.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
